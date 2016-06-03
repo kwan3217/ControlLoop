@@ -95,14 +95,15 @@ class RoboSim(object):
         #is at the center of curvature. Imagine a two-wheeled vehicle (or one
         #set of front-and-back wheels on a 4-wheel robot) with +X towards the
         #right and +Y towards the front (body coordinates). The center of the 
-        #back wheel is at the origin. In this frame, the center of curvature
-        #is directly to the side of the back wheel, and therefore on the 
-        #x-axis (y=mx+b,m=0,b=0). Also, the center of curvature is on the line
-        #perpendicular to the steering wheels. This is on the line y=mx+b, 
-        #b=wheelbase, m=0 if straight ahead, negative if turning right, -inf
-        #if turned 90deg to the right, positive if turning left, and +inf if
-        #90deg to left, therefore m=-tan(st) since steer is positive to the 
-        #right.
+        #back wheel is at the origin. The front wheel will therefore be on the 
+        #+Y-axis, and the distance from the origin will be exactly the wheelbase.
+        #In this frame, the center of curvature is directly to the side of the 
+        #back wheel, and therefore on the X-axis (y=mx+b,m=0,b=0). Also, the 
+        #center of curvature is on the line perpendicular to the steering wheels.
+        #This is on the line y=mx+b, b=wheelbase, m=0 if straight ahead, negative
+        #if turning right, -inf if turned 90deg to the right, positive if turning
+        #left, and +inf if 90deg to left, therefore m=-tan(st) since steer is 
+        #positive to the right.
         #So, solve 0=-tan(steer)*x+b
         #-b=-tan(steer)*x
         # b=tan(steer)*x

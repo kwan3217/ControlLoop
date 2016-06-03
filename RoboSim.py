@@ -46,7 +46,7 @@ class RoboSim(object):
         self.sp=0       #Actual speed in cm'/s
         self.stCmd=0    #Steering in range [-1,1] where -1 is full left, +1 is full right
         self.st=0       #actual steering angle in radians right of center
-        self.f = open('c:/Users/chrisj/robosim.csv','w')
+        self.f = open('robosim.csv','w')
         print("t,x,y,hdg,spCmd,sp,stCmd,st",file=self.f)
 
     def stepSim(self):

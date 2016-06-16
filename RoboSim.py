@@ -1,31 +1,10 @@
-from math import sin,cos,tan,pi
-from abc import ABC, abstractmethod
+from math import sin,cos,tan
+from Robot import RobotInterface, coerceHeadingRad
 
-def coerceHeadingRad(heading):
+class RoboSim(RobotInterface):
     '''
-    Return a heading in radians, equivalent to the given heading, within the 
-    proper range for a heading (between 0 to 2*pi).
+    Simulated robot. This keeps track of the simulated state vector
     '''
-    while heading<0:
-        heading+=2*pi
-    while heading>2*pi:
-        heading-=2*pi
-    return heading
-
-class RoboController(ABC):
-    @abstractmethod
-    def navigate(self):
-        pass
-    
-    @abstractmethod
-    def guide(self):
-        pass
-    
-    @abstractmethod
-    def control(self):
-        pass
-    
-class RoboSim(object):
     #set class fields (treated as constants)
     tickSize=1.0/1024  #time step size in seconds. Done this way to be an exactly representable number in floating-point
     wheelbase=30       #distance along vehicle axis between center of back axle and center of rotation of steering joint on front axle, cm'
@@ -34,7 +13,7 @@ class RoboSim(object):
     maxSp=500          #maximum speed in cm'/s - presumed to be the same forward and reverse
     spSlewSpeed=500    #speed change speed (acceleration) in cm'/s^2
     spDeadZone=80      #Minimum speed in cm'/s - commanded speeds with absolute value less than this get coerced to zero
-    def __init__(self):
+    def __init__(self,oufn):
         '''
         set instance fields (treated as variables, independent if multiple instances)
         '''
@@ -46,12 +25,15 @@ class RoboSim(object):
         self.sp=0       #Actual speed in cm'/s
         self.stCmd=0    #Steering in range [-1,1] where -1 is full left, +1 is full right
         self.st=0       #actual steering angle in radians right of center
-        self.f = open('robosim.csv','w')
+        self.f = open(oufn,'w')
         print("t,x,y,hdg,spCmd,sp,stCmd,st",file=self.f)
-
+    def steer(self, steering):
+        self.stCmd=steering
+    def throttle(self, throttle):
+        self.spCmd=throttle
     def stepSim(self):
         """
-        Propagate the robot actual state by one time step.
+        Propagate the robot simulated state by one time step.
         
         This routine does the following in order:
         * Adusts the speed towards the commanded speed if necessary
@@ -62,7 +44,7 @@ class RoboSim(object):
         """
         # adjust speed
         cmdSp=self.spCmd*self.maxSp
-        if abs(cmdSp)<self.spdDeadZone:
+        if abs(cmdSp)<self.spDeadZone:
             #enforce throttle dead zone
             cmdSp=0
         if abs(cmdSp-self.sp)<self.spSlewSpeed*self.tickSize:
@@ -109,7 +91,8 @@ class RoboSim(object):
         # b=tan(steer)*x
         # b/tan(steer)=x=r,   turning radius from back wheels.
         # tan(steer)/b=kappa, turning curvature (units of 1/cm')
-        kappa=tan(self.st)/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
+        # steer/b~=kappa,     take advantage of small angle approximation
+        kappa=self.st/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
         
         #Figure yaw rate
         #The yaw rate is just the speed divided by the turning radius (so speed cm'/s multiplied by curvature 1/cm'=1/s)
@@ -136,30 +119,4 @@ class RoboSim(object):
         """    
         print("%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f" % (self.t,self.x,self.y,self.heading,self.spCmd,self.sp,self.stCmd,self.st),file=self.f)
         
-    def control(self):
-        """
-        Calculate the steering and throttle command.
-        
-        This particular routine is open-loop and designed to pass the April 1
-        test -- drive forward, turn right, then drive forward again
-        """
-        if self.t<2:
-            self.spCmd=0.25
-            self.stCmd=0
-        elif self.t<4:
-            self.spCmd=0.25
-            self.stCmd=1
-        elif self.t<6:
-            self.stCmd=0.25
-            self.stCmd=0
-        else:
-            self.stCmd=0
-            self.spCmd=0
-           
-#Instantiate the robot                
-robosim=RoboSim()
-#Main loop - let the robot NGC run, then step the simulation
-while robosim.t<8:
-    robosim.control()
-    robosim.stepSim()
-    robosim.print()    
+            

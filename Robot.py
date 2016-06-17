@@ -83,3 +83,11 @@ class RobotController(ABC):
     def control(self):
         pass
     
+    def state(self):
+        '''
+        Return a string describing the controller state.
+        
+        May include the estimated state vector, any guidance calculations, etc
+        Anything interesting for debugging the controller operation
+        '''
+        return '' 

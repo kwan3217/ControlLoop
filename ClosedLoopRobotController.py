@@ -11,8 +11,4 @@ class ClosedLoopRobotController(RobotController):
         self.P=P;
     def control(self):
         stCmd=self.P*coerceDHeadingRad(self.heading-self.cmdHeading)
-        if stCmd>1:
-            stCmd=1
-        elif stCmd<-1:
-            stCmd=-1
         self.interface.steer.write(stCmd)

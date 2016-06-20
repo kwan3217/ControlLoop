@@ -12,12 +12,12 @@ class ServoSim(Servo):
         self.act=act0
         self.write(linterp(actMin,cmdMin,actMax,cmdMax,act0))
     def write(self,cmd):
-        if cmd>self.cmdMax:
-            cmd=self.cmdMax
-        elif cmd<self.cmdMin:
-            cmd=self.cmdMin
         self.cmd=cmd
         self.cmdAct=linterp(self.cmdMin,self.actMin,self.cmdMax,self.actMax,cmd)
+        if self.cmdAct>self.actMax:
+            self.cmdAct=self.actMax
+        elif self.cmdAct<self.actMin:
+            self.cmdAct=self.actMin
     def read(self):
         return self.act
     def step(self,dt):

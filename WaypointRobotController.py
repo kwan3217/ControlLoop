@@ -30,7 +30,6 @@ class WaypointRobotController(CheatNavController):
         self.hasNewPos=False
         if isnan(self.base[0]):
             self.recalcWaypoint()
-        self.cmdHeading=coerceHeadingRad(atan2((self.tgt[0]-self.pos[0]),(self.tgt[1]-self.pos[1])))
         self.togo=self.pos-self.wpts[self.i_wpt] #vector of space remaining to go, from waypoint to robot
         self.dotp=dot(self.baseline,self.togo)
         if self.dotp<0:
@@ -40,6 +39,8 @@ class WaypointRobotController(CheatNavController):
                 self.i_wpt=0
                 self.interface.throttle.write(0) #hit the brakes
             self.recalcWaypoint()
+        #Calculate the heading AFTER we update the waypoint. This should fix issue #6
+        self.cmdHeading=coerceHeadingRad(atan2((self.tgt[0]-self.pos[0]),(self.tgt[1]-self.pos[1])))
     def state(self):
         return ("%0.6f,%0.6f," % tuple(self.wpts[self.i_wpt])
                +"%0.6f,%0.6f," % tuple(self.base)

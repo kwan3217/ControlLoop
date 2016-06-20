@@ -4,7 +4,11 @@ import numpy
 
 #Instantiate the robot simulator                
 robosim=RoboSim('OneWaypoint.csv',WaypointRobotController.stateheading)
-robocontrol=WaypointRobotController(robosim,[numpy.array([4000.0,4000.0]),numpy.array([0.0,0.0])])
+robocontrol=WaypointRobotController(robosim,[
+    numpy.array([500.0,3000.0]),
+    numpy.array([4000.0,2900.0]),
+    numpy.array([3500.0,-500.0]),
+    numpy.array([0.0,0.0])])
 robosim.throttle.write(1)
 
 #Main loop - let the robot NGC run, then step the simulation

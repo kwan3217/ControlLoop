@@ -6,7 +6,7 @@ class ServoSim(Servo):
     def __init__(self,cmdMin,cmdMax,actMin,actMax,slewRate,act0):
         self.cmdMin=cmdMin
         self.cmdMax=cmdMax
-        self.actMin=cmdMin
+        self.actMin=actMin
         self.actMax=actMax
         self.slewRate=slewRate
         self.act=act0

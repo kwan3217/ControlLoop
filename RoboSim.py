@@ -1,6 +1,35 @@
 from math import sin,cos,tan
-from Robot import RobotInterface, coerceHeadingRad
+from Robot import RobotInterface, coerceHeadingRad, Servo, linterp
 from numpy import array
+
+class ServoSim(Servo):
+    def __init__(self,cmdMin,cmdMax,actMin,actMax,slewRate,act0):
+        self.cmdMin=cmdMin
+        self.cmdMax=cmdMax
+        self.actMin=actMin
+        self.actMax=actMax
+        self.slewRate=slewRate
+        self.act=act0
+        self.write(linterp(actMin,cmdMin,actMax,cmdMax,act0))
+    def write(self,cmd):
+        self.cmd=cmd
+        self.cmdAct=linterp(self.cmdMin,self.actMin,self.cmdMax,self.actMax,cmd)
+        if self.cmdAct>self.actMax:
+            self.cmdAct=self.actMax
+        elif self.cmdAct<self.actMin:
+            self.cmdAct=self.actMin
+    def read(self):
+        return self.act
+    def step(self,dt):
+        if abs(self.cmdAct-self.act)<self.slewRate*dt:
+            # less than one step from there, just set it
+            self.act=self.cmdAct
+        elif self.cmdAct>self.act:
+            #speed up
+            self.act+=self.slewRate*dt
+        else:
+            #slow down
+            self.act-=self.slewRate*dt
 
 class RoboSim(RobotInterface):
     '''
@@ -18,19 +47,13 @@ class RoboSim(RobotInterface):
         '''
         set instance fields (treated as variables, independent if multiple instances)
         '''
+        self.steer=ServoSim(-1,1,-self.maxSt,self.maxSt,self.stSlewSpeed,0)
+        self.throttle=ServoSim(-1,1,-self.maxSp,self.maxSp,self.spSlewSpeed,0)
         self.t=0        #Current time (useful for printing state, visible to NGC)
         self.pos=array([0.0,0.0])  #Position relative to starting point in cm'
         self.heading=0  #heading in radians east of true North
-        self.spCmd=0    #Commanded throttle in range [-1,1]
-        self.sp=0       #Actual speed in cm'/s
-        self.stCmd=0    #Steering in range [-1,1] where -1 is full left, +1 is full right
-        self.st=0       #actual steering angle in radians right of center
         self.f = open(oufn,'w')
         print("t,x,y,hdg,spCmd,sp,stCmd,st,"+extrastate,file=self.f)
-    def steer(self, steering):
-        self.stCmd=steering
-    def throttle(self, throttle):
-        self.spCmd=throttle
     def stepSim(self):
         """
         Propagate the robot simulated state by one time step.
@@ -42,44 +65,21 @@ class RoboSim(RobotInterface):
         * Calculates the velocity vector
         * Updates the position vector
         """
-        # adjust speed
-        cmdSp=self.spCmd*self.maxSp
-        if abs(cmdSp)<self.spDeadZone:
-            #enforce throttle dead zone
-            cmdSp=0
-        if abs(cmdSp-self.sp)<self.spSlewSpeed*self.tickSize:
-            # less than one step from there, just set it
-            self.sp=cmdSp
-        elif cmdSp>self.sp:
-            #speed up
-            self.sp+=self.spSlewSpeed*self.tickSize
-        else:
-            #slow down
-            self.sp-=self.spSlewSpeed*self.tickSize
+        # Step the servos
+        self.steer.step(self.tickSize)
+        self.throttle.step(self.tickSize)
         
-        # adjust steering
-        cmdSt=self.stCmd*self.maxSt
-        if abs(cmdSt-self.st)<self.stSlewSpeed*self.tickSize:
-            # less than one step from there, just set it
-            self.st=cmdSt
-        elif cmdSt>self.st:
-            #turn more right
-            self.st+=self.stSlewSpeed*self.tickSize
-        else:
-            #turn less right (more left)
-            self.st-=self.stSlewSpeed*self.tickSize
-
         #Figure turning curvature and yaw rate from steering angle - see 
         #https://github.com/kwan3217/RoboSim/wiki/Turning-Circle
-        kappa=self.st/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
-        dbeta=self.sp*kappa
-       
+        kappa=self.steer.read()/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
+        dbeta=self.throttle.read()*kappa
+        
         #Update heading
         self.heading+=dbeta*self.tickSize
         self.heading=coerceHeadingRad(self.heading)
         
         #calculate velocity
-        v=self.sp*array([sin(self.heading),cos(self.heading)])*self.tickSize
+        v=self.throttle.read()*array([sin(self.heading),cos(self.heading)])*self.tickSize
         
         #update position
         self.pos+=v
@@ -91,6 +91,4 @@ class RoboSim(RobotInterface):
         """
         Print the robot current actual state.
         """    
-        print("%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%s" % (self.t,self.pos[0],self.pos[1],self.heading,self.spCmd,self.sp,self.stCmd,self.st,extrastate),file=self.f)
-        
-            
+        print("%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%0.6f,%s" % (self.t,self.pos[0],self.pos[1],self.heading,self.throttle.cmd,self.throttle.act,self.steer.cmd,self.steer.act,extrastate),file=self.f)

@@ -1,2 +1,2 @@
-# RoboSim
-Learning how to write a navigation-guidance-control system for an autonomous vehicle. I am working on documenting my design processes for the Sparkfun AVC
+# Yukari4
+Robot code for Yukari 4, my entry (and one of the St Kwan's team entries) into the Sparkfun Autonomous Vehicle Competition (AVC)

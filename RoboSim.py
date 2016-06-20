@@ -1,4 +1,4 @@
-from math import sin,cos,tan
+from math import sin,cos
 from Robot import RobotInterface, coerceHeadingRad, Servo, linterp
 from numpy import array
 
@@ -38,17 +38,12 @@ class RoboSim(RobotInterface):
     #set class fields (treated as constants)
     tickSize=1.0/64  #time step size in seconds. Done this way to be an exactly representable number in floating-point
     wheelbase=30       #distance along vehicle axis between center of back axle and center of rotation of steering joint on front axle, cm'
-    maxSt=0.2          #steering stop in radians from center
-    stSlewSpeed=1      #steering slew speed in rad/s
-    maxSp=500          #maximum speed in cm'/s - presumed to be the same forward and reverse
-    spSlewSpeed=500    #speed change speed (acceleration) in cm'/s^2
-    spDeadZone=80      #Minimum speed in cm'/s - commanded speeds with absolute value less than this get coerced to zero
     def __init__(self,oufn,extrastate):
         '''
         set instance fields (treated as variables, independent if multiple instances)
         '''
-        self.steer=ServoSim(-1,1,-self.maxSt,self.maxSt,self.stSlewSpeed,0)
-        self.throttle=ServoSim(-1,1,-self.maxSp,self.maxSp,self.spSlewSpeed,0)
+        self.steer   =ServoSim(-1,1,-0.2,0.2,1,0) #Steering actuator is tan(steering angle) approximately steering angle in radians, rate is in tan/s, approximately rad/s
+        self.throttle=ServoSim(-1,1,-500.0,500.0,500.0,0) #Actuator is speed in cm'/s, rate is in cm'/s^2
         self.t=0        #Current time (useful for printing state, visible to NGC)
         self.pos=array([0.0,0.0])  #Position relative to starting point in cm'
         self.heading=0  #heading in radians east of true North

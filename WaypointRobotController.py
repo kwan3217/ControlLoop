@@ -40,7 +40,7 @@ class WaypointRobotController(ClosedLoopRobotController):
             if self.i_wpt==len(self.wpts):
                 # If this was the last waypoint, start steering back towards the first one just to have something to do
                 self.i_wpt=0
-                self.interface.throttle(0) #hit the brakes
+                self.interface.throttle.write(0) #hit the brakes
             self.recalcWaypoint()
     def state(self):
         return ("%0.6f,%0.6f," % tuple(self.wpts[self.i_wpt])

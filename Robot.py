@@ -1,6 +1,10 @@
 from math import pi
 from abc import ABC, abstractmethod
 
+def linterp(x0,y0,x1,y1,x):
+    t=(x-x0)/(x1-x0)
+    return y0*(1-t)+y1*t
+
 def coerceHeadingRad(heading):
     '''
     Return a heading in radians, equivalent to the given heading, within the 
@@ -23,6 +27,16 @@ def coerceDHeadingRad(dheading):
         dheading-=2*pi
     return dheading
 
+class Servo(ABC):
+    '''
+    Represents a servo in either the simulator or actual hardware. 
+    
+    Since only a simulated servo can be read, we only have write in this
+    class - read and step will be in the ServoSim class
+    '''
+    @abstractmethod
+    def write(self, value):
+        pass
 
 class RobotInterface(ABC):
     '''
@@ -32,24 +46,9 @@ class RobotInterface(ABC):
     robot will use the same interface, so that the same RoboController can be
     used to drive either a simulated or real robot.
     ''' 
-    @abstractmethod
-    def steer(self, steering):
-        '''
-        Steer the robot.
-        
-        Parameters:
-        steering: Steering command, from -1 to represent full left steering to +1 to represent full right.
-        '''
-        pass
-    @abstractmethod
-    def throttle(self, throttle):
-        '''
-        Set the robot speed.
-        
-        Parameters:
-        steering: Throttle command, from -1 to represent full reverse to +1 to represent full forward.
-        '''
-        pass
+    def __init__(self,steer,throttle):
+        self.steer=steer
+        self.throttle=throttle
 
 class RobotController(ABC):
     '''

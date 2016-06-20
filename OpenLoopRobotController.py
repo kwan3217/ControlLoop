@@ -12,12 +12,12 @@ class OpenLoopRobotController(RobotController):
         test -- drive forward, turn right, then drive forward again
         """
         if self.interface.t<2:
-            self.interface.throttle(0.25)
-            self.interface.steer(0)
+            self.interface.throttle.write(0.25)
+            self.interface.steer.write(0)
         elif self.interface.t<4:
-            self.interface.steer(1)
+            self.interface.steer.write(1)
         elif self.interface.t<6:
-            self.interface.steer(0)
+            self.interface.steer.write(0)
         else:
-            self.interface.throttle(0)
+            self.interface.throttle.write(0)
            

@@ -15,5 +15,4 @@ class ClosedLoopRobotController(RobotController):
             stCmd=1
         elif stCmd<-1:
             stCmd=-1
-        self.interface.steer(stCmd)
-                
+        self.interface.steer.write(stCmd)

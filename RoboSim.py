@@ -12,6 +12,10 @@ class ServoSim(Servo):
         self.act=act0
         self.write(linterp(actMin,cmdMin,actMax,cmdMax,act0))
     def write(self,cmd):
+        if cmd>self.cmdMax:
+            cmd=self.cmdMax
+        elif cmd<self.cmdMin:
+            cmd=self.cmdMin
         self.cmd=cmd
         self.cmdAct=linterp(self.cmdMin,self.actMin,self.cmdMax,self.actMax,cmd)
     def read(self):
@@ -48,10 +52,6 @@ class RoboSim(RobotInterface):
         self.t=0        #Current time (useful for printing state, visible to NGC)
         self.pos=array([0.0,0.0])  #Position relative to starting point in cm'
         self.heading=0  #heading in radians east of true North
-        self.spCmd=0    #Commanded throttle in range [-1,1]
-        self.sp=0       #Actual speed in cm'/s
-        self.stCmd=0    #Steering in range [-1,1] where -1 is full left, +1 is full right
-        self.st=0       #actual steering angle in radians right of center
         self.f = open(oufn,'w')
         print("t,x,y,hdg,spCmd,sp,stCmd,st,"+extrastate,file=self.f)
     def stepSim(self):
@@ -71,15 +71,15 @@ class RoboSim(RobotInterface):
         
         #Figure turning curvature and yaw rate from steering angle - see 
         #https://github.com/kwan3217/RoboSim/wiki/Turning-Circle
-        kappa=self.st/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
-        dbeta=self.sp*kappa
+        kappa=self.steer.read()/self.wheelbase #(units are radians (1/1) divided by cm'=1/cm', correct for curvature)
+        dbeta=self.throttle.read()*kappa
         
         #Update heading
         self.heading+=dbeta*self.tickSize
         self.heading=coerceHeadingRad(self.heading)
         
         #calculate velocity
-        v=self.sp*array([sin(self.heading),cos(self.heading)])*self.tickSize
+        v=self.throttle.read()*array([sin(self.heading),cos(self.heading)])*self.tickSize
         
         #update position
         self.pos+=v

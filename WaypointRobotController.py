@@ -1,27 +1,22 @@
-from ClosedLoopRobotController import ClosedLoopRobotController
+from CheatNavController import CheatNavController
 from Robot import coerceHeadingRad
 from math import atan2, isnan
 from numpy.linalg import norm
 from numpy import array, dot
 
-class WaypointRobotController(ClosedLoopRobotController):
+class WaypointRobotController(CheatNavController):
     overshoot=0 #cm', distance along baseline from waypoint to target point
     stateheading='wptX,wptY,baseX,baseY,targetX,targetY,baselineX,baselineY,togoX,togoY,dot,cmdHdg'
     def __init__(self,interface,wpts):
-        ClosedLoopRobotController.__init__(self, interface)
-        self.pos       =array([float('nan'),float('nan')])
+        CheatNavController.__init__(self, interface)
         self.base      =array([float('nan'),float('nan')])
         self.wpts      =wpts
         self.i_wpt     =0
         self.tgt       =array([float('nan'),float('nan')])
         self.baseline  =array([float('nan'),float('nan')])
         self.baseDir   =array([float('nan'),float('nan')])
-        self.heading   =       float('nan')
         self.cmdHeading=       float('nan')
         self.dotp      =       float('nan')
-    def navigate(self):
-        self.pos=self.interface.pos
-        self.heading=self.interface.heading
     def recalcWaypoint(self):
         self.base=self.pos
         #Define the baseline, a vector from the waypoint to the base point
@@ -30,6 +25,9 @@ class WaypointRobotController(ClosedLoopRobotController):
         self.baseDir=self.baseline/norm(self.baseline)
         self.tgt=self.wpts[self.i_wpt]-self.overshoot*self.baseDir
     def guide(self):
+        if not self.hasNewPos:
+            return
+        self.hasNewPos=False
         if isnan(self.base[0]):
             self.recalcWaypoint()
         self.cmdHeading=coerceHeadingRad(atan2((self.tgt[0]-self.pos[0]),(self.tgt[1]-self.pos[1])))

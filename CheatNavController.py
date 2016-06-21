@@ -1,20 +1,22 @@
-from ClosedLoopRobotController import ClosedLoopRobotController
-from Robot import coerceHeadingRad
-from math import atan2, isnan
-from numpy.linalg import norm
-from numpy import array, dot
+from Robot import RobotNavigator
+from math import isnan
+from copy import copy
 
-class CheatNavController(ClosedLoopRobotController):
+class CheatNav(RobotNavigator):
+    stateheading=RobotNavigator.stateheading+",tNextPos"
     def __init__(self,interface,posInterval=1.0):
-        ClosedLoopRobotController.__init__(self, interface)
-        self.pos       =array([float('nan'),float('nan')])
-        self.heading   =       float('nan')
+        RobotNavigator.__init__(self, interface)
         self.posInterval=posInterval
-        self.tLastPos=float('nan')
-        self.hasNewPos=False
+        self.tNextPos=float('nan')
     def navigate(self):
-        if isnan(self.tLastPos) or self.tLastPos+self.posInterval<self.interface.t:
-            self.pos=self.interface.pos
-            self.tLastPos=self.interface.t
-            self.hasNewPos=True
+        self.hasNewHdg=True
         self.heading=self.interface.heading
+        self.t=self.interface.t
+        if isnan(self.tNextPos) or self.tNextPos<self.t:
+            self.pos=copy(self.interface.pos)
+            if isnan(self.tNextPos):
+                self.tNextPos=0
+            self.tNextPos+=self.posInterval
+            self.hasNewPos=True
+    def state(self):
+        return RobotNavigator.state(self)+",%0.6f" % self.tNextPos

@@ -1,8 +1,8 @@
 from Robot import RobotController
 
 class OpenLoopRobotController(RobotController):
-    def __init__(self,interface):
-        RobotController.__init__(self, interface)
+    def __init__(self,interface,nav=[],guide=[]):
+        RobotController.__init__(self, interface,nav,guide)
 
     def control(self):
         """

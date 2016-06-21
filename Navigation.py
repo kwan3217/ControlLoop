@@ -2,7 +2,14 @@ from Robot import RobotNavigator
 from math import isnan
 from copy import copy
 
+'''
+Concrete implementations of RobotNavigator classes
+'''
+
 class CheatNav(RobotNavigator):
+    '''
+    Navigate by stealing simulated state vector from a RoboSim interface
+    '''
     stateheading=RobotNavigator.stateheading+",tNextPos"
     def __init__(self,interface,posInterval=1.0):
         RobotNavigator.__init__(self, interface)

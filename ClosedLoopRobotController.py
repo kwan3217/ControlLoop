@@ -5,7 +5,7 @@ class ClosedLoopRobotController(RobotController):
     Robot controller which uses actual heading from estimated state vector 
     and commanded heading from guidance to calculate a steering command.
     
-    Currently implements (only) Proportional Control
+    Currently implements (only) Proportional Guidance
     '''
     stateheading=RobotController.stateheading
     def __init__(self,interface,nav,guide,P=-1):

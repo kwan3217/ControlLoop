@@ -97,7 +97,7 @@ class RobotController(ABC):
     and executes the control loop for a robot.
     
     Member fields include the estimated state vector (maintained by navigate)
-    and the guidance command vector (maintained by guide). Control can read 
+    and the guidance command vector (maintained by guide). Guidance can read 
     both of these, and is expected to generate steering commands and send them
     to the associated RobotInterface  
     '''

@@ -1,20 +1,25 @@
 from RoboSim import RoboSim
-from WaypointRobotController import WaypointRobotController
+from Guidance import WaypointGuidance
+from Control import ClosedLoopRobotController
+from Navigation import CheatNav
 import numpy
 
 #Instantiate the robot simulator                
-robosim=RoboSim('OneWaypoint.csv',WaypointRobotController.stateheading)
-robocontrol=WaypointRobotController(robosim,[
-    numpy.array([500.0,3000.0]),
-    numpy.array([4000.0,2900.0]),
-    numpy.array([3500.0,-500.0]),
-    numpy.array([0.0,0.0])])
+robosim=RoboSim('OneWaypoint.csv',CheatNav.stateheading+","+WaypointGuidance.stateheading+","+ClosedLoopRobotController.stateheading)
+nav=CheatNav(robosim)
+guide=WaypointGuidance(nav,[
+    numpy.array([   0.0, 1500.0]),
+    numpy.array([3500.0,-1500.0]),
+    numpy.array([3500.0, 1500.0]),
+    numpy.array([   0.0,-1500.0]),
+    numpy.array([   0.0,    0.0])])
+control=ClosedLoopRobotController(robosim,nav,guide)
 robosim.throttle.write(1)
 
 #Main loop - let the robot NGC run, then step the simulation
 while robosim.throttle.read()>0 or robosim.throttle.cmd>0:
-    robocontrol.navigate()
-    robocontrol.guide()
-    robocontrol.control()
+    nav.navigate()
+    guide.guide()
+    control.control()
     robosim.stepSim()
-    robosim.print(robocontrol.state())    
+    robosim.print(nav.state()+","+guide.state()+","+control.state())    

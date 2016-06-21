@@ -1,5 +1,6 @@
 from math import pi
 from abc import ABC, abstractmethod
+from numpy import array
 
 def linterp(x0,y0,x1,y1,x):
     t=(x-x0)/(x1-x0)
@@ -40,7 +41,7 @@ class Servo(ABC):
 
 class RobotInterface(ABC):
     '''
-    Interface to the robot controls and sensors. 
+    Interface to the robot controls.
     
     On a real robot, this will create and transmit servo commands. A simulated
     robot will use the same interface, so that the same RoboController can be
@@ -49,35 +50,66 @@ class RobotInterface(ABC):
     def __init__(self,steer,throttle):
         self.steer=steer
         self.throttle=throttle
-
+        
+class RobotNavigator(ABC):
+    '''
+    Maintain the state vector of the robot
+    '''
+    stateheading='nt,nposX,nposY,nHeading'
+    def __init__(self,interface):
+        self.interface=interface
+        self.t        =0.0
+        self.pos      =array([float('nan'),float('nan')])
+        self.heading  =       float('nan')
+        self.hasNewPos=False
+        self.hasNewHdg=False
+    @abstractmethod
+    def navigate(self):        
+        pass
+    def state(self):
+        '''
+        Return a string describing the navigator state.
+        '''
+        return ("%0.6f," % self.t
+               +"%0.6f,%0.6f," % tuple(self.pos)
+               +"%0.6f" % self.heading)
+    
+class RobotGuidance(ABC):
+    '''
+    Maintain the state vector of the robot
+    '''
+    stateheading='cmdHeading'
+    def __init__(self,nav):
+        self.nav=nav
+        self.cmdHeading=float('nan')
+        self.go=True
+    @abstractmethod
+    def guide(self):        
+        pass
+    def state(self):
+        '''
+        Return a string describing the guidance state.
+        '''
+        return "%0.6f" % self.cmdHeading
 class RobotController(ABC):
     '''
     Maintains the state vector estimate of the robot, calculates the giudance values,
     and executes the control loop for a robot.
     
     Member fields include the estimated state vector (maintained by navigate)
-    and the guidance command vector (maintained by guide). Control can read 
+    and the guidance command vector (maintained by guide). Guidance can read 
     both of these, and is expected to generate steering commands and send them
     to the associated RobotInterface  
     '''
-    def __init__(self,interface):
+    stateheading=""
+    def __init__(self,interface,nav,guide):
         '''
         set instance fields (treated as variables, independent if multiple instances)
         '''
+        self.nav=nav                    #expected to be a RobotNavigator
+        self.guide=guide                #expected to be a RobotGuidance
         self.interface=interface        #expected to be a RobotInterface
 
-    def navigate(self):
-        '''
-        Check if any sensors need to be read, read them if necessary, and update the state vector estimate.
-        '''
-        pass
-
-    def guide(self):
-        '''
-        Calculate the new guidance commands for the control loop
-        '''
-        pass
-    
     @abstractmethod
     def control(self):
         pass
@@ -85,8 +117,5 @@ class RobotController(ABC):
     def state(self):
         '''
         Return a string describing the controller state.
-        
-        May include the estimated state vector, any guidance calculations, etc
-        Anything interesting for debugging the controller operation
         '''
         return '' 

@@ -16,6 +16,7 @@ class WaypointGuidance(RobotGuidance):
         self.tgt       =array([float('nan'),float('nan')])
         self.baseline  =array([float('nan'),float('nan')])
         self.baseDir   =array([float('nan'),float('nan')])
+        self.togo      =array([float('nan'),float('nan')])
         self.dotp      =       float('nan')
         self.t         =float('nan')
     def recalcWaypoint(self):
@@ -29,7 +30,7 @@ class WaypointGuidance(RobotGuidance):
         if not self.nav.hasNewPos:
             return
         self.nav.hasNewPos=False
-        self.t=self.nav.t
+        self.t=self.nav.tPos
         self.pos=copy(self.nav.pos)
         if isnan(self.base[0]):
             self.recalcWaypoint()

@@ -21,5 +21,5 @@ while robosim.throttle.read()>0 or robosim.throttle.cmd>0:
     nav.navigate()
     guide.guide()
     control.control()
-    robosim.stepSim()
     robosim.print(nav.state()+","+guide.state()+","+control.state())    
+    robosim.stepSim()

@@ -1,17 +1,18 @@
 from RoboSim import RoboSim
-from WaypointRobotController import WaypointGuidance
-from ClosedLoopRobotController import ClosedLoopRobotController
-from CheatNavController import CheatNav
+from Guidance import WaypointGuidance
+from Control import ClosedLoopRobotController
+from Navigation import CheatNav
 import numpy
 
 #Instantiate the robot simulator                
 robosim=RoboSim('OneWaypoint.csv',CheatNav.stateheading+","+WaypointGuidance.stateheading+","+ClosedLoopRobotController.stateheading)
 nav=CheatNav(robosim)
 guide=WaypointGuidance(nav,[
-    numpy.array([500.0,3000.0]),
-    numpy.array([4000.0,2900.0]),
-    numpy.array([3500.0,-500.0]),
-    numpy.array([0.0,0.0])])
+    numpy.array([   0.0, 1500.0]),
+    numpy.array([3500.0,-1500.0]),
+    numpy.array([3500.0, 1500.0]),
+    numpy.array([   0.0,-1500.0]),
+    numpy.array([   0.0,    0.0])])
 control=ClosedLoopRobotController(robosim,nav,guide)
 robosim.throttle.write(1)
 

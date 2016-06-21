@@ -5,7 +5,7 @@ from numpy.linalg import norm
 from numpy import array, dot
 
 class WaypointGuidance(RobotGuidance):
-    overshoot=0 #cm', distance along baseline from waypoint to target point
+    overshoot=500 #cm', distance along baseline from waypoint to target point
     stateheading='gt,gposX,gposY,wptX,wptY,baseX,baseY,targetX,targetY,baselineX,baselineY,togoX,togoY,dot,'+RobotGuidance.stateheading
     def __init__(self,nav,wpts):
         RobotGuidance.__init__(self, nav)

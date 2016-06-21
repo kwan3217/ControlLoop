@@ -72,7 +72,7 @@ class RobotNavigator(ABC):
         '''
         return ("%0.6f," % self.t
                +"%0.6f,%0.6f," % tuple(self.pos)
-               +"%0.6f," % self.heading)
+               +"%0.6f" % self.heading)
     
 class RobotGuidance(ABC):
     '''

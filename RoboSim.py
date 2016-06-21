@@ -43,7 +43,7 @@ class RoboSim(RobotInterface):
         set instance fields (treated as variables, independent if multiple instances)
         '''
         self.steer   =ServoSim(-1,1,-0.2,0.2,1,0) #Steering actuator is tan(steering angle) approximately steering angle in radians, rate is in tan/s, approximately rad/s
-        self.throttle=ServoSim(-1,1,-500.0,500.0,500.0,0) #Actuator is speed in cm'/s, rate is in cm'/s^2
+        self.throttle=ServoSim(-1,1,-300.0,300.0,500.0,0) #Actuator is speed in cm'/s, rate is in cm'/s^2
         self.t=0        #Current time (useful for printing state, visible to NGC)
         self.pos=array([0.0,0.0])  #Position relative to starting point in cm'
         self.heading=0  #heading in radians east of true North

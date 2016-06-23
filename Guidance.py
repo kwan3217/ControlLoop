@@ -20,8 +20,11 @@ class WaypointGuidance(RobotGuidance):
         self.dotp      =       float('nan')
         self.t         =float('nan')
         self.n         =3 #different from the position size so that we know how to stick two-element vectors into it
-        self.tHist=zeros(self.n)
-        self.pHist=zeros([self.n,2])
+        self.tHist=zeros(self.n)      #Time history
+        self.pHist=zeros([self.n,2])  #Position history
+        self.m         =array([float('nan'),float('nan')]) #fitted speed
+        self.b         =array([float('nan'),float('nan')]) #fitted location at t0
+        self.a         =array([float('nan'),float('nan')]) #dot
     def recalcWaypoint(self):
         self.base=copy(self.pos)
         #Define the baseline, a vector from the waypoint to the base point
@@ -36,15 +39,17 @@ class WaypointGuidance(RobotGuidance):
             self.i_wpt=0
             self.go=False #hit the brakes
         self.recalcWaypoint()
+    def recordHistory(self):
+        #Record the current time
+        self.tHist=hstack((self.tHist[1:],self.nav.tPPS))
+        self.pos=copy(self.nav.pos)
+        self.pHist=vstack((self.pHist[1:,:],copy(self.pos)))
     def guide(self):
         self.t=self.nav.t
         if self.nav.hasNewPos:
             self.nav.hasNewPos=False
             self.nav.hasPPS=False
-            #Record the current time
-            self.tHist=hstack((self.tHist[1:],self.nav.tPPS))
-            self.pos=copy(self.nav.pos)
-            self.pHist=vstack((self.pHist[1:,:],copy(self.pos)))
+            self.recordHistory()
             if isnan(self.base[0]):
                 self.recalcWaypoint()
             self.togo=self.pos-self.wpts[self.i_wpt] #vector of space remaining to go, from waypoint to robot

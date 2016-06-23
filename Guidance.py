@@ -53,8 +53,8 @@ class WaypointGuidance(RobotGuidance):
                 self.incWaypoint()
             #Calculate the heading AFTER we update the waypoint. This should fix issue #6
             self.cmdHeading=coerceHeadingRad(atan2((self.tgt[0]-self.pos[0]),(self.tgt[1]-self.pos[1])))
-        if self.t>self.tPredictWpt:
-            self.incWaypoint()
+#        if self.t>self.tPredictWpt:
+#            self.incWaypoint()
     def state(self):
         return ("%0.6f," % self.t
                +"%0.6f,%0.6f," % tuple(self.pos)
